@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bunssh</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="login">
+    <form id="login-form">
+      <h1>bunssh</h1>
+      <input type="text" id="host" placeholder="Host" value="localhost" required>
+      <input type="number" id="port" placeholder="Port" value="22" required>
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Connect</button>
+      <div id="login-error"></div>
+    </form>
+  </div>
+
+  <div id="terminal-container" style="display: none;">
+    <div id="terminal"></div>
+  </div>
+
+  <div id="disconnect-overlay" style="display: none;">
+    <div id="disconnect-message">
+      <p>SSH session disconnected</p>
+      <button id="reconnect-btn">Reconnect</button>
+    </div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>

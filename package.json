@@ -1,0 +1,23 @@
+{
+  "name": "bunssh",
+  "module": "src/server.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun run src/build.ts",
+    "start": "bun run src/server.ts",
+    "dev": "bun run src/build.ts && bun --watch run src/server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/ssh2": "^1.15.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "ssh2": "^1.17.0"
+  }
+}
