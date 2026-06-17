@@ -6,6 +6,19 @@ import { readFileSync, existsSync } from "fs";
 const PORT = parseInt(process.env["PORT"] ?? "8091", 10);
 const DIST_DIR = join(import.meta.dir, "..", "dist");
 
+// Parse "KEY=VALUE,FOO=bar" into an env object. Empty/invalid entries are skipped.
+function parseEnv(raw: string | undefined): Record<string, string> | undefined {
+  if (!raw) return undefined;
+  const env: Record<string, string> = {};
+  for (const entry of raw.split(",")) {
+    const eq = entry.indexOf("=");
+    if (eq <= 0) continue;
+    const key = entry.slice(0, eq).trim();
+    if (key) env[key] = entry.slice(eq + 1).trim();
+  }
+  return Object.keys(env).length > 0 ? env : undefined;
+}
+
 const autoConnectConfig: SSHConfig | null =
   process.env["SSH_HOST"] && process.env["SSH_USERNAME"] && process.env["SSH_PASSWORD"]
     ? {
@@ -13,6 +26,7 @@ const autoConnectConfig: SSHConfig | null =
         port: parseInt(process.env["SSH_PORT"] ?? "22", 10),
         username: process.env["SSH_USERNAME"],
         password: process.env["SSH_PASSWORD"],
+        env: parseEnv(process.env["SSH_ENV"]),
       }
     : null;
 
@@ -21,7 +35,7 @@ interface WSData {
 }
 
 type WSMessage =
-  | { type: "auth"; host?: string; port?: number; username?: string; password?: string; auto?: boolean }
+  | { type: "auth"; host?: string; port?: number; username?: string; password?: string; env?: Record<string, string>; auto?: boolean }
   | { type: "data"; data: string }
   | { type: "resize"; cols: number; rows: number };
 
@@ -88,6 +102,7 @@ const server = Bun.serve<WSData>({
               port: msg.port ?? 22,
               username: msg.username,
               password: msg.password,
+              env: msg.env && Object.keys(msg.env).length > 0 ? msg.env : undefined,
             };
           } else {
             ws.send(JSON.stringify({ type: "error", message: "Missing credentials" }));
@@ -108,6 +123,11 @@ const server = Bun.serve<WSData>({
 
           ssh.onError = (err: Error) => {
             ws.send(JSON.stringify({ type: "error", message: err.message }));
+          };
+
+          ssh.onEnvRejected = (keys: string[]) => {
+            const warning = `\r\n\x1b[33m⚠ server refused env var(s): ${keys.join(", ")} (check AcceptEnv in sshd_config)\x1b[0m\r\n`;
+            ws.send(JSON.stringify({ type: "data", data: Buffer.from(warning).toString("base64") }));
           };
 
           try {

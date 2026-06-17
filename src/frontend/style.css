@@ -66,6 +66,87 @@ body {
   min-height: 20px;
 }
 
+#env-section summary {
+  cursor: pointer;
+  color: #999;
+  font-size: 13px;
+  user-select: none;
+  padding: 2px 0;
+}
+
+#env-section summary:hover {
+  color: #ccc;
+}
+
+#env-section[open] summary {
+  margin-bottom: 8px;
+}
+
+#env-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.env-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.env-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.env-row input:focus {
+  border-color: #007acc;
+}
+
+.env-row .env-remove {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #999;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.env-row .env-remove:hover {
+  border-color: #f44;
+  color: #f44;
+  background: transparent;
+}
+
+#env-add {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px dashed #555;
+  border-radius: 4px;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#env-add:hover {
+  border-color: #007acc;
+  color: #ccc;
+  background: transparent;
+}
+
 #terminal-container {
   width: 100vw;
   height: 100vh;

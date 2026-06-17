@@ -21,6 +21,8 @@ const terminalContainer = document.getElementById("terminal-container")!;
 const terminalEl = document.getElementById("terminal")!;
 const disconnectOverlay = document.getElementById("disconnect-overlay")!;
 const reconnectBtn = document.getElementById("reconnect-btn")!;
+const envRows = document.getElementById("env-rows")!;
+const envAddBtn = document.getElementById("env-add")!;
 
 let terminal: Terminal | null = null;
 let ws: WebSocket | null = null;
@@ -144,6 +146,47 @@ function connect(authMsg: object) {
   };
 }
 
+// Environment variable rows
+function addEnvRow(key = "", value = "") {
+  const row = document.createElement("div");
+  row.className = "env-row";
+
+  const keyInput = document.createElement("input");
+  keyInput.type = "text";
+  keyInput.placeholder = "NAME";
+  keyInput.value = key;
+  keyInput.className = "env-key";
+
+  const valueInput = document.createElement("input");
+  valueInput.type = "text";
+  valueInput.placeholder = "value";
+  valueInput.value = value;
+  valueInput.className = "env-value";
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "env-remove";
+  removeBtn.textContent = "×";
+  removeBtn.setAttribute("aria-label", "Remove variable");
+  removeBtn.addEventListener("click", () => row.remove());
+
+  row.append(keyInput, valueInput, removeBtn);
+  envRows.append(row);
+}
+
+function collectEnv(): Record<string, string> | undefined {
+  const env: Record<string, string> = {};
+  for (const row of Array.from(envRows.querySelectorAll(".env-row"))) {
+    const key = (row.querySelector(".env-key") as HTMLInputElement).value.trim();
+    if (!key) continue;
+    env[key] = (row.querySelector(".env-value") as HTMLInputElement).value;
+  }
+  return Object.keys(env).length > 0 ? env : undefined;
+}
+
+envAddBtn.addEventListener("click", () => addEnvRow());
+addEnvRow();
+
 // Login form handler
 loginForm.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -153,8 +196,9 @@ loginForm.addEventListener("submit", (e) => {
   const port = parseInt((document.getElementById("port") as HTMLInputElement).value, 10);
   const username = (document.getElementById("username") as HTMLInputElement).value;
   const password = (document.getElementById("password") as HTMLInputElement).value;
+  const env = collectEnv();
 
-  connect({ type: "auth", host, port, username, password });
+  connect({ type: "auth", host, port, username, password, ...(env ? { env } : {}) });
 });
 
 // Reconnect button

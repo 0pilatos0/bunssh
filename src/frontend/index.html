@@ -14,6 +14,11 @@
       <input type="number" id="port" placeholder="Port" value="22" required>
       <input type="text" id="username" placeholder="Username" required>
       <input type="password" id="password" placeholder="Password" required>
+      <details id="env-section">
+        <summary>Environment variables</summary>
+        <div id="env-rows"></div>
+        <button type="button" id="env-add">+ Add variable</button>
+      </details>
       <button type="submit">Connect</button>
       <div id="login-error"></div>
     </form>
