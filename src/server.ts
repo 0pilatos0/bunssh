@@ -126,8 +126,7 @@ const server = Bun.serve<WSData>({
           };
 
           ssh.onEnvRejected = (keys: string[]) => {
-            const warning = `\r\n\x1b[33m⚠ server refused env var(s): ${keys.join(", ")} (check AcceptEnv in sshd_config)\x1b[0m\r\n`;
-            ws.send(JSON.stringify({ type: "data", data: Buffer.from(warning).toString("base64") }));
+            ws.send(JSON.stringify({ type: "env_rejected", keys }));
           };
 
           try {

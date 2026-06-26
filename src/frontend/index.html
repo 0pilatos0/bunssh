@@ -25,7 +25,38 @@
   </div>
 
   <div id="terminal-container" style="display: none;">
-    <div id="terminal"></div>
+    <div id="terminal-area">
+      <div id="terminal"></div>
+    </div>
+    <aside id="metrics-panel" aria-hidden="true">
+      <div class="hud-conn">
+        <span id="m-led" class="hud-led" data-state="idle"></span>
+        <span id="m-state" class="hud-state" data-state="idle">IDLE</span>
+        <span id="m-uptime" class="hud-uptime">—</span>
+        <div id="m-identity" class="hud-identity">—</div>
+        <span id="m-reconnects" class="hud-reconnects" hidden></span>
+      </div>
+
+      <div class="hud-rule"><span>Throughput</span></div>
+      <div class="hud-throughput">
+        <span class="hud-stat"><span class="hud-ico">↓</span><span id="m-bytes-in">0 B</span></span>
+        <span class="hud-stat"><span class="hud-ico">↑</span><span id="m-bytes-out">0 B</span></span>
+        <span class="hud-stat"><span class="hud-ico">✎</span><span id="m-writes">0</span></span>
+      </div>
+      <div id="m-spark" class="hud-spark" aria-hidden="true"></div>
+      <div class="hud-rate"><span id="m-rate">0 B/s</span> in</div>
+
+      <div class="hud-rule"><span>Activity</span></div>
+      <div class="hud-activity">
+        <span id="m-idle" class="hud-actdot" data-idle="">—</span>
+        <span id="m-lastbyte" class="hud-lastbyte">—</span>
+      </div>
+
+      <div class="hud-rule"><span>Events</span></div>
+      <ul id="m-events" class="hud-events"></ul>
+
+      <div id="m-alert" style="display: none;"></div>
+    </aside>
   </div>
 
   <div id="disconnect-overlay" style="display: none;">
