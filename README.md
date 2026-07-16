@@ -34,6 +34,30 @@ SSH_HOST=myserver.com SSH_PORT=22 SSH_USERNAME=user SSH_PASSWORD=secret bun run 
 
 Or use a `.env` file (see `.env.example`).
 
+### Connect via URL
+
+Pass credentials in the URL to connect instantly, without any server config. Handy for popout links that log in automatically:
+
+```
+http://localhost:8091/?host=myserver.com&port=22&username=user&password=secret&env=TERM=xterm,LANG=C
+```
+
+| Param | Required | Description |
+|-------|----------|-------------|
+| `host` | yes | SSH host |
+| `port` | no (default `22`) | SSH port |
+| `username` | yes | SSH username |
+| `password` | yes | SSH password |
+| `env` | no | Session env vars as `KEY=VALUE,FOO=bar` |
+
+When `host`, `username`, and `password` are all present the login form is skipped and the connection starts immediately. Credentials are read entirely in the browser and stripped from the address bar after connecting.
+
+Prefer the **hash fragment** over the query string to keep credentials out of server access logs and `Referer` headers, it's read the same way:
+
+```
+http://localhost:8091/#host=myserver.com&username=user&password=secret
+```
+
 ### Development
 
 ```bash

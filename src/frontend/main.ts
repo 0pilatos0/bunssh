@@ -504,8 +504,57 @@ setInterval(() => {
 }, 250);
 renderPanel();
 
-// Auto-connect check
+// Parse "KEY=VALUE,FOO=bar" into an env object. Empty/invalid entries are skipped.
+function parseEnvString(raw: string | null): Record<string, string> | undefined {
+  if (!raw) return undefined;
+  const env: Record<string, string> = {};
+  for (const entry of raw.split(",")) {
+    const eq = entry.indexOf("=");
+    if (eq <= 0) continue;
+    const key = entry.slice(0, eq).trim();
+    if (key) env[key] = entry.slice(eq + 1).trim();
+  }
+  return Object.keys(env).length > 0 ? env : undefined;
+}
+
+// Build an auth message from URL credentials. Reads the hash fragment first
+// (kept out of server logs and Referer headers), then falls back to the query
+// string. Returns null when host/username/password aren't all present.
+function authFromUrl(): object | null {
+  const hash = location.hash.startsWith("#") ? location.hash.slice(1) : "";
+  const params = new URLSearchParams(hash || location.search);
+
+  const host = params.get("host");
+  const username = params.get("username");
+  const password = params.get("password");
+  if (!host || !username || !password) return null;
+
+  const portRaw = params.get("port");
+  const port = portRaw ? parseInt(portRaw, 10) : 22;
+  const env = parseEnvString(params.get("env"));
+
+  return { type: "auth", host, port, username, password, ...(env ? { env } : {}) };
+}
+
+// Connect using credentials from the URL, hiding the login form.
+function connectFromUrl(authMsg: object) {
+  loginEl.style.display = "none";
+  terminalContainer.style.display = "flex";
+
+  // Strip credentials from the address bar so they don't linger in history.
+  history.replaceState(null, "", location.pathname);
+
+  connect(authMsg);
+}
+
+// Auto-connect: URL credentials take priority, then server-side env config.
 (async () => {
+  const urlAuth = authFromUrl();
+  if (urlAuth) {
+    connectFromUrl(urlAuth);
+    return;
+  }
+
   try {
     const res = await fetch("/config");
     const config = await res.json();
