@@ -251,6 +251,24 @@ body {
   border-top: 1px solid var(--line);
 }
 
+/* environment */
+.hud-env {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+}
+
+.hud-env dt {
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.hud-env dd {
+  color: #ccc;
+  text-align: right;
+  word-break: break-all;
+}
+
 /* throughput */
 .hud-throughput {
   display: flex;

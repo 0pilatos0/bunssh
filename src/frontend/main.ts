@@ -21,6 +21,7 @@ interface Metrics {
   writeCount: number;
   lastByteAt: number | null;
   lastError: string | null;
+  env: Record<string, string>;
   envRejected: string[];
 }
 
@@ -65,12 +66,15 @@ const metrics: Metrics = {
   writeCount: 0,
   lastByteAt: null,
   lastError: null,
+  env: {},
   envRejected: [],
 };
 
 const panelLed = document.getElementById("m-led")!;
 const panelState = document.getElementById("m-state")!;
 const panelIdentity = document.getElementById("m-identity")!;
+const panelEnvSection = document.getElementById("m-env-section")!;
+const panelEnv = document.getElementById("m-env")!;
 const panelUptime = document.getElementById("m-uptime")!;
 const panelReconnects = document.getElementById("m-reconnects")!;
 const panelBytesIn = document.getElementById("m-bytes-in")!;
@@ -225,6 +229,22 @@ function renderPanel() {
   panelState.textContent = metrics.state.toUpperCase();
   panelState.setAttribute("data-state", metrics.state);
   panelIdentity.textContent = metrics.identity || "—";
+
+  const envKeys = Object.keys(metrics.env);
+  if (envKeys.length > 0) {
+    panelEnv.replaceChildren();
+    for (const key of envKeys) {
+      const dt = document.createElement("dt");
+      dt.textContent = key;
+      const dd = document.createElement("dd");
+      dd.textContent = metrics.env[key]!;
+      panelEnv.append(dt, dd);
+    }
+    panelEnvSection.style.display = "";
+  } else {
+    panelEnvSection.style.display = "none";
+  }
+
   panelBytesIn.textContent = formatBytes(metrics.bytesIn);
   panelBytesOut.textContent = formatBytes(metrics.bytesOut);
   panelWrites.textContent = String(metrics.writeCount);
@@ -323,8 +343,9 @@ function createTerminal(cols: number, rows: number): Terminal {
 function connect(authMsg: object) {
   lastAuthMsg = authMsg;
 
-  const a = authMsg as { auto?: boolean; username?: string; host?: string; port?: number };
+  const a = authMsg as { auto?: boolean; username?: string; host?: string; port?: number; env?: Record<string, string> };
   metrics.identity = a.auto ? "auto-connect" : `${a.username}@${a.host}:${a.port ?? 22}`;
+  metrics.env = a.env ?? {};
   setState("connecting");
 
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
