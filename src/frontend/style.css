@@ -269,6 +269,68 @@ body {
   word-break: break-all;
 }
 
+/* debug toggle — hides the diagnostic sections by default */
+.hud-debug {
+  margin-top: 16px;
+}
+
+.hud-debug > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.hud-debug > summary::-webkit-details-marker { display: none; }
+
+.hud-debug > summary::after {
+  content: "▸";
+  font-size: 10px;
+  color: var(--dim);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.hud-debug[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.hud-debug > summary:hover {
+  color: #ccc;
+  border-color: var(--accent);
+  background: rgba(95, 215, 215, 0.06);
+}
+
+.hud-debug > summary:hover::after { color: var(--accent); }
+
+.hud-debug[open] > summary {
+  color: #ccc;
+  border-color: var(--line);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.hud-debug-body {
+  border: 1px solid var(--line);
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  padding: 2px 10px 12px;
+}
+
+.hud-debug-body > .hud-rule:first-child { margin-top: 10px; }
+
+.hud-debug:not([open]) .hud-debug-body { display: none; }
+
 /* throughput */
 .hud-throughput {
   display: flex;
