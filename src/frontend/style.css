@@ -355,6 +355,15 @@ body {
   line-height: 1.4;
 }
 
+/* Hide the terminal scrollbar (scrollback is disabled anyway). */
+.xterm-viewport {
+  scrollbar-width: none;
+}
+
+.xterm-viewport::-webkit-scrollbar {
+  display: none;
+}
+
 /* Slim popouts: drop the side panel so the terminal owns the width. */
 @media (max-width: 640px) {
   #metrics-panel {

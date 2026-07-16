@@ -288,6 +288,9 @@ function createTerminal(cols: number, rows: number): Terminal {
     cols,
     rows,
     cursorBlink: true,
+    // No scrollback: keeps the view pinned to the live screen so users can't
+    // scroll up into pre-session output (login banner / MOTD).
+    scrollback: 0,
     fontFamily: "'Menlo', 'DejaVu Sans Mono', 'Consolas', monospace",
     fontSize: 14,
     theme: {
