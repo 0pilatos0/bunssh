@@ -340,9 +340,14 @@ function connect(authMsg: object) {
         disconnectOverlay.style.display = "none";
         terminalContainer.style.display = "flex";
 
+        const sz = authMsg as { cols?: number; rows?: number };
+        const cols = sz.cols ?? 80;
+        const rows = sz.rows ?? 24;
+
         if (!terminal) {
-          terminal = createTerminal(80, 24);
+          terminal = createTerminal(cols, rows);
         } else {
+          terminal.resize(cols, rows);
           terminal.clear();
         }
 
@@ -573,8 +578,26 @@ function authFromUrl(): object | null {
   const portRaw = params.get("port");
   const port = portRaw ? parseInt(portRaw, 10) : 22;
   const env = parseEnvString(params.get("env"));
+  const cols = posIntParam(params.get("cols"));
+  const rows = posIntParam(params.get("rows"));
 
-  return { type: "auth", host, port, username, password, ...(env ? { env } : {}) };
+  return {
+    type: "auth",
+    host,
+    port,
+    username,
+    password,
+    ...(env ? { env } : {}),
+    ...(cols ? { cols } : {}),
+    ...(rows ? { rows } : {}),
+  };
+}
+
+// Parse a positive integer URL param, or undefined when absent/invalid.
+function posIntParam(raw: string | null): number | undefined {
+  if (!raw) return undefined;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
 }
 
 // Connect using credentials from the URL, hiding the login form.

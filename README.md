@@ -49,6 +49,10 @@ http://localhost:8091/?host=myserver.com&port=22&username=user&password=secret&e
 | `username` | yes | SSH username |
 | `password` | yes | SSH password |
 | `env` | no | Session env vars as `KEY=VALUE,FOO=bar` |
+| `cols` | no (default `80`) | Terminal width in columns |
+| `rows` | no (default `24`) | Terminal height in rows |
+
+Set `cols`/`rows` to match the app you're driving. Many TTY apps (e.g. RF/scanner UIs) draw a narrow fixed layout, so a small `cols` keeps a popout window tight, e.g. `&cols=40&rows=24`. On a narrow window the side metrics panel hides automatically so the terminal owns the full width.
 
 When `host`, `username`, and `password` are all present the login form is skipped and the connection starts immediately. Credentials are read entirely in the browser and stripped from the address bar after connecting.
 

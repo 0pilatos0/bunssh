@@ -35,9 +35,15 @@ interface WSData {
 }
 
 type WSMessage =
-  | { type: "auth"; host?: string; port?: number; username?: string; password?: string; env?: Record<string, string>; auto?: boolean }
+  | { type: "auth"; host?: string; port?: number; username?: string; password?: string; env?: Record<string, string>; cols?: number; rows?: number; auto?: boolean }
   | { type: "data"; data: string }
   | { type: "resize"; cols: number; rows: number };
+
+// Clamp a requested terminal dimension to a sane range, falling back to a default.
+function clampDim(value: number | undefined, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(500, Math.max(1, Math.floor(value)));
+}
 
 function getMimeType(path: string): string {
   if (path.endsWith(".html")) return "text/html";
@@ -130,8 +136,8 @@ const server = Bun.serve<WSData>({
           };
 
           try {
-            const cols = 80;
-            const rows = 24;
+            const cols = clampDim(msg.cols, 80);
+            const rows = clampDim(msg.rows, 24);
             await ssh.connect(config, cols, rows);
             ws.send(JSON.stringify({ type: "connected" }));
           } catch (err) {

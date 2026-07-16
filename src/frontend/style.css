@@ -355,6 +355,13 @@ body {
   line-height: 1.4;
 }
 
+/* Slim popouts: drop the side panel so the terminal owns the width. */
+@media (max-width: 640px) {
+  #metrics-panel {
+    display: none;
+  }
+}
+
 #disconnect-overlay {
   position: fixed;
   inset: 0;
