@@ -83,6 +83,51 @@ const panelAlert = document.getElementById("m-alert")!;
 const sparkEl = document.getElementById("m-spark")!;
 const panelRate = document.getElementById("m-rate")!;
 
+// Tab chrome: favicon + title reflect the live connection so popout windows are
+// identifiable at a glance instead of all reading "bunssh".
+const faviconLink = document.getElementById("favicon") as HTMLLinkElement;
+
+const STATE_COLOR: Record<ConnectionState, string> = {
+  idle: "#8a8a8a",
+  connecting: "#e0a83a",
+  connected: "#3ddc84",
+  closed: "#e05a5a",
+  error: "#e05a5a",
+};
+
+// A terminal ">_" prompt glyph, tinted by connection state.
+function makeFavicon(color: string): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">` +
+    `<rect width="32" height="32" rx="6" fill="#1e1e1e"/>` +
+    `<path d="M7 11l5 5-5 5" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<rect x="15" y="20" width="9" height="2.5" rx="1.25" fill="${color}"/>` +
+    `</svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+function updateChrome() {
+  faviconLink.href = makeFavicon(STATE_COLOR[metrics.state]);
+
+  const id = metrics.identity.includes("@") ? metrics.identity : "";
+  switch (metrics.state) {
+    case "connecting":
+      document.title = id ? `connecting… ${id}` : "connecting…";
+      break;
+    case "connected":
+      document.title = id || "ssh session";
+      break;
+    case "closed":
+      document.title = id ? `● ${id}` : "disconnected";
+      break;
+    case "error":
+      document.title = id ? `⚠ ${id}` : "error";
+      break;
+    default:
+      document.title = "bunssh";
+  }
+}
+
 // Sparkline: rolling samples of incoming bytes/sec, drawn as block characters.
 const SPARK_BLOCKS = "▁▂▃▄▅▆▇█";
 const SPARK_SAMPLES = 32;
@@ -153,6 +198,7 @@ function setState(state: ConnectionState) {
   metrics.state = state;
   pushEvent(state, state);
   renderPanel();
+  updateChrome();
 }
 
 function sampleRate() {
@@ -208,9 +254,6 @@ function renderPanel() {
 
   if (metrics.lastError) {
     panelAlert.textContent = `⚠ ${metrics.lastError}`;
-    panelAlert.style.display = "block";
-  } else if (metrics.envRejected.length > 0) {
-    panelAlert.textContent = `⚠ server refused env var(s): ${metrics.envRejected.join(", ")}`;
     panelAlert.style.display = "block";
   } else {
     panelAlert.style.display = "none";
@@ -338,12 +381,9 @@ function connect(authMsg: object) {
         break;
 
       case "env_rejected":
+        // Tracked for getMetrics(), but not surfaced: refusals are expected
+        // when the server's AcceptEnv doesn't list the requested vars.
         metrics.envRejected = msg.keys;
-        pushEvent(`env refused: ${msg.keys.join(", ")}`, "env");
-        renderPanel();
-        terminal?.write(
-          `\r\n\x1b[33m⚠ server refused env var(s): ${msg.keys.join(", ")} (check AcceptEnv in sshd_config)\x1b[0m\r\n`
-        );
         break;
 
       case "closed":
@@ -503,6 +543,7 @@ setInterval(() => {
   renderPanel();
 }, 250);
 renderPanel();
+updateChrome();
 
 // Parse "KEY=VALUE,FOO=bar" into an env object. Empty/invalid entries are skipped.
 function parseEnvString(raw: string | null): Record<string, string> | undefined {
