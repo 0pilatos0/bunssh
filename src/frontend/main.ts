@@ -628,16 +628,22 @@ function posIntParam(raw: string | null): number | undefined {
 function connectFromUrl(authMsg: object) {
   loginEl.style.display = "none";
   terminalContainer.style.display = "flex";
-
-  // Strip credentials from the address bar so they don't linger in history.
-  history.replaceState(null, "", location.pathname);
-
   connect(authMsg);
+}
+
+// Wipe any query/hash from the address bar so credentials can't linger in
+// history or be captured in a screenshot. Unconditional: runs even when the
+// params are incomplete and we fall back to the login form.
+function clearUrl() {
+  if (location.search || location.hash) {
+    history.replaceState(null, "", location.pathname);
+  }
 }
 
 // Auto-connect: URL credentials take priority, then server-side env config.
 (async () => {
   const urlAuth = authFromUrl();
+  clearUrl();
   if (urlAuth) {
     connectFromUrl(urlAuth);
     return;
